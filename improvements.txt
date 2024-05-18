@@ -1,0 +1,5 @@
+make api for categories
+bubble chart based on degree on node
+better labels
+isolation of nodes/edges
+bho

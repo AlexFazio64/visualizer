@@ -22,14 +22,30 @@
     graph.check(nodes, links, map);
     // return;
 
-    const width = 1800;
-    const height = 1200;
-    svg = d3.select("svg").attr("width", width).attr("height", height);
+    const width = 1400;
+    const height = 650;
+    const initialTranslate = [width / 2, height / 2];
+
+    function zoomed({ transform }) {
+      g.attr("transform", transform);
+    }
+
+    const zoom = d3.zoom().scaleExtent([0.01, 20]).on("zoom", zoomed);
+
+    svg = d3
+      .select("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .call(zoom);
+
+    const g = svg
+      .append("g")
+      .attr("transform", `translate(${initialTranslate})`);
 
     function showLabel(_event, d) {
       d3.select(this).attr("fill", "blue");
-      svg
-        .append("text")
+      g.append("text")
+        .attr("transform", `translate(${initialTranslate})`)
         .attr("class", "label")
         .attr("x", d.x + 15)
         .attr("y", d.y)
@@ -38,7 +54,7 @@
 
     function hideLabel() {
       d3.select(this).attr("fill", "red");
-      svg.select(".label").remove();
+      g.select(".label").remove();
     }
 
     // const linkLabel = svg
@@ -53,12 +69,16 @@
 
     const simulation = d3
       .forceSimulation(nodes)
-      .force("charge", d3.forceManyBody().strength(-500))
+      .force("charge", d3.forceManyBody().strength(-1000))
+      .force("x", d3.forceX())
+      .force("y", d3.forceY())
       .force(
         "link",
-        d3.forceLink(links).id((d) => d.id).distance(100)
-      )
-      .force("center", d3.forceCenter(width / 2, height / 2))
+        d3
+          .forceLink(links)
+          .id((d) => d.id)
+          .distance(200)
+      );
 
     simulation.on("tick", () => {
       link
@@ -74,21 +94,23 @@
       //   .attr("y", (d) => (d.source.y + d.target.y) / 2);
     });
 
-    const link = svg
+    const link = g
       .selectAll("line")
       .data(links)
       .enter()
       .append("line")
+      .attr("transform", `translate(${initialTranslate})`)
       .attr("stroke", "#999")
-      .attr("stroke-opacity", 0.6);
+      .attr("stroke-opacity", 0.4);
 
-    const node = svg
+    const node = g
       .selectAll("circle")
       .data(nodes)
       .enter()
       .append("circle")
+      .attr("transform", `translate(${initialTranslate})`)
       .attr("stroke", "#fff")
-      .attr("stroke-width", 1.5)
+      .attr("stroke-width", 1)
       .attr("r", 10)
       .attr("fill", "red")
       .on("mouseover", showLabel)

@@ -1,5 +1,5 @@
 <div class="app">
-  <main>
+  <main id="container">
     <slot />
   </main>
 </div>
@@ -16,8 +16,8 @@
     display: flex;
     flex-direction: column;
     padding: 1rem;
-    width: 100%;
-    max-width: 64rem;
+    width: 100vw;
+    height: 100vh;
     margin: 0 auto;
     box-sizing: border-box;
     justify-content: center;
