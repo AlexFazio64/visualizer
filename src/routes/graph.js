@@ -44,14 +44,8 @@ export function make_nodes(wiki_nodes, url_to_dir, files) {
   return Promise.all(promises);
 }
 
-export function check(wiki_nodes, wiki_links, map) {
+export function check(wiki_nodes, wiki_links) {
   const invalid_links = new Set();
-
-  // search for node in links
-  // for (const link of wiki_links) {
-  //   if (link.source === "07734") console.log(link, "s");
-  //   if (link.target === "07734") console.log(link, "t");
-  // }
 
   for (const link of wiki_links) {
     let found_source = false;
@@ -84,4 +78,93 @@ export function check(wiki_nodes, wiki_links, map) {
   const invalid_links_array = Array.from(invalid_links);
   invalid_links_array.sort();
   for (const link of invalid_links_array) console.log(link);
+}
+
+export async function getCategories() {
+  let categories = await fetch("/api/categories").then((response) =>
+    response.json()
+  );
+
+  categories = new Map(
+    categories.map((category) => [category.id, category.categories])
+  );
+  return categories;
+}
+
+export function getDegrees(nodes, links) {
+  const degrees = new Map();
+
+  for (let node of nodes) {
+    degrees.set(node.id, 0);
+    for (let link of links) {
+      if (link.source === node.id || link.target === node.id) {
+        if (degrees.has(node.id)) {
+          degrees.set(node.id, degrees.get(node.id) + 1);
+        }
+      }
+    }
+  }
+
+  return degrees;
+}
+
+export function degrees(map) {
+  let max = 0;
+  let min = 0;
+
+  for (let value of map.values()) {
+    if (value > max) max = value;
+    if (value < min) min = value;
+  }
+
+  return { max, min };
+}
+
+export async function getStats(id1, id2, nodes, links, map) {
+  //find id1 and id2 in nodes
+  let node1 = null;
+  let node2 = null;
+  for (let node of nodes) {
+    if (node.id === id1) node1 = node;
+    if (node.id === id2) node2 = node;
+
+    if (node1 && node2) break;
+  }
+
+  //find links between id1 and id2
+  let edges = [];
+  for (let link of links) {
+    if (link.source.id === id1 && link.target.id === id2) edges.push(link);
+    if (link.source.id === id2 && link.target.id === id1) edges.push(link);
+  }
+
+  function getInfo(node, other, map) {
+    const text = [];
+    for (let key in node) {
+      if (
+        !node.hasOwnProperty(key) ||
+        typeof node[key] !== "object" ||
+        !node[key] ||
+        !node[key].link
+      )
+        continue;
+
+      const links = node[key].link;
+
+      for (let link of links) {
+        if (map.get(link) === other.id) {
+          text.push(node[key].text);
+        }
+      }
+    }
+    return text;
+  }
+
+  let info = [];
+  Array.prototype.push.apply(info, getInfo(node1, node2, map));
+  Array.prototype.push.apply(info, getInfo(node2, node1, map));
+
+  info = info.filter((text) => text.length > 0);
+
+  return info;
 }

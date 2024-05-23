@@ -1,5 +1,8 @@
-make api for categories
-bubble chart based on degree on node
-better labels
-isolation of nodes/edges
-bho
+bubble chart based on degree on node [optional]
+better labels [improve sidebar]
+make api for categories [done]
+isolation of nodes/edges [done]
+filter by category
+filter by degree threshold
+find shortest path between two nodes
+show subgraph based on selected nodes
