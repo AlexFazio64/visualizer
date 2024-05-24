@@ -1,8 +1,10 @@
-bubble chart based on degree on node [optional]
-better labels [improve sidebar]
+better UI [done]
 make api for categories [done]
 isolation of nodes/edges [done]
-filter by category
-filter by degree threshold
-find shortest path between two nodes
-show subgraph based on selected nodes
+
+show subgraph based on selected nodes [to do]
+filter by category [in progress]
+filter by degree threshold [in progress]
+find shortest path between two nodes [to do]
+
+bubble chart based on degree on node [optional]

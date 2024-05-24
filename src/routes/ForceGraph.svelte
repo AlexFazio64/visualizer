@@ -2,16 +2,30 @@
   import { onMount } from "svelte";
   import * as d3 from "d3";
   import * as graph from "./graph";
+  import { createEventDispatcher } from "svelte";
+
+  const dispatch = createEventDispatcher();
+  export let toggle = false;
+
+  $: if (toggle) {
+    clear();
+    toggle = false;
+    dispatch("cleared");
+  }
+
+  $: if (selected_arr || edges) {
+    dispatch("selection", { arr: selected_arr, edges: edges });
+  }
 
   let svg;
-
+  let edges = [];
   let selected = null;
   let selected_arr = [];
-  let edges = [];
-  const width = 1400;
-  const height = 650;
-  let categories;
+  let categories = null;
+  let info = { root: "", hovered: "" };
 
+  const width = 1200;
+  const height = 590;
   const color = d3.scaleOrdinal(d3.schemeCategory10);
 
   function highlight(circle, highlight = true) {
@@ -45,7 +59,10 @@
     await graph.make_nodes(nodes, map, files);
     graph.make_links(nodes, map, links);
     degrees = graph.getDegrees(nodes, links);
+
     categories = await graph.getCategories(nodes);
+    dispatch("categories", { categories });
+
     const initialTranslate = [width / 2, height / 2];
 
     function zoomed({ transform }) {
@@ -54,30 +71,19 @@
 
     const zoom = d3.zoom().scaleExtent([0.01, 20]).on("zoom", zoomed);
 
-    svg = d3
-      .select("svg")
-      .attr("width", width)
-      .attr("height", height)
-      .call(zoom);
+    svg = d3.select("svg").call(zoom);
 
-    const g = svg
-      .append("g")
-      .attr("transform", `translate(${initialTranslate})`);
+    const g = svg.append("g");
 
     function showLabel(_event, d) {
       if (selected !== d.id) d3.select(this).attr("fill", "blue");
-      g.append("text")
-        .attr("transform", `translate(${initialTranslate})`)
-        .attr("class", "label")
-        .attr("x", d.x + 15)
-        .attr("y", d.y)
-        .text(d.id);
+      info.hovered = d.id;
     }
 
     function hideLabel() {
       if (selected !== d3.select(this).data()[0].id)
         d3.select(this).attr("fill", (d) => color(degrees.get(d.id)));
-      g.select(".label").remove();
+      info.hovered = "";
     }
 
     function updateGraph() {
@@ -136,7 +142,7 @@
         .attr("fill", (d) => color(degrees.get(d.id)))
         .on("mouseover", showLabel)
         .on("mouseout", hideLabel)
-        .on("click", stats)
+        .on("click", click)
         .merge(nodeSelection)
         .attr("cx", (d) => d.x)
         .attr("cy", (d) => d.y)
@@ -145,7 +151,9 @@
       g.selectAll("circle").raise();
     }
 
-    async function stats(_event) {
+    async function click(_event) {
+      dispatch("hello", { node: d3.select(this).data()[0] });
+
       const d = d3.select(this).data()[0];
 
       if (_event.shiftKey) {
@@ -169,9 +177,11 @@
 
       if (selected === d.id) {
         selected = null;
+        info.root = "";
         highlight(this, false);
       } else if (selected === null) {
         selected = d.id;
+        info.root = d.id;
         highlight(this);
       }
 
@@ -231,56 +241,83 @@
         .on("end", dragended);
     }
   });
-</script>
 
-<ul>
-  {#if selected_arr.length === 2}
-    {#each selected_arr as node}
-      <li>{node}</li>
-      <ol>
-        {#each categories.get(node) as category}
-          <li>{category.text}</li>
-        {/each}
-      </ol>
-    {/each}
-    {#each edges as edge}
-      <li>{edge}</li>
-    {/each}
-  {/if}
-</ul>
-
-<div>
-  <button
-    on:click={() => {
+  function clear() {
+    d3.selectAll("circle")._groups[0].forEach((circle) => {
+      if (circle.attributes.getNamedItem("r").value === "15") {
+        circle.dispatchEvent(new MouseEvent("click"));
+      }
+    });
+    selected_arr.forEach((id) => {
       d3.selectAll("circle")._groups[0].forEach((circle) => {
-        if (circle.attributes.getNamedItem("r").value === "15") {
-          circle.dispatchEvent(new MouseEvent("click"));
+        if (circle.__data__.id === id) {
+          circle.dispatchEvent(new MouseEvent("click", { shiftKey: true }));
         }
       });
+    });
+    selected_arr = [];
+  }
+</script>
 
-      selected_arr.forEach((id) => {
-        d3.selectAll("circle")._groups[0].forEach((circle) => {
-          if (circle.__data__.id === id) {
-            circle.dispatchEvent(new MouseEvent("click", { shiftKey: true }));
-          }
-        });
-      });
-
-      selected_arr = [];
-    }}>Clear</button
-  >
+<section>
+  <span>
+    <p>Root:</p>
+    <p class="root">
+      {info.root}
+    </p>
+    <p>Hovered:</p>
+    <p class="hover">
+      {info.hovered}
+    </p>
+  </span>
   <svg></svg>
-</div>
-<text class="label"></text>
+</section>
 
 <style>
-  div {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    flex-direction: column;
-    gap: 0.5rem;
+  span {
+    width: 100%;
+    max-width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, auto 3fr);
+    gap: 0.5em;
+    justify-items: center;
+    align-content: center;
   }
+
+  span p {
+    color: white;
+    font-size: 1em;
+    font-family: sans-serif;
+
+    max-width: 500px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  p:nth-child(odd) {
+    text-decoration: underline;
+    font-weight: bold;
+  }
+
+  section {
+    grid-row: 2 / 3;
+    grid-column: 2 / 3;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+  }
+
+  .root {
+    color: white;
+  }
+
+  .hover {
+    color: cornflowerblue;
+  }
+
   svg {
     background: rgb(30, 30, 30);
     border: 1px solid #606060;
@@ -288,59 +325,9 @@
     fill: white;
     font-size: 1rem;
     font-family: sans-serif;
+
+    height: 100%;
+    width: 100%;
     box-sizing: border-box;
-  }
-
-  .label {
-    font-size: 1rem;
-  }
-
-  ul {
-    min-width: 200px;
-    max-width: 300px;
-    height: 100vh;
-    position: absolute;
-
-    margin: 0;
-    box-sizing: border-box;
-
-    top: 0;
-    left: 0;
-    overflow: scroll;
-
-    border: 1px solid #606060;
-    background: rgb(30, 30, 30);
-
-    color: white;
-    font-size: 1rem;
-    font-family: sans-serif;
-  }
-
-  ul::-webkit-scrollbar {
-    width: 10px;
-  }
-
-  ul::-webkit-scrollbar-thumb {
-    background: #606060;
-  }
-
-  ul::-webkit-scrollbar-track {
-    background: rgb(30, 30, 30);
-  }
-
-  ul::-webkit-scrollbar-thumb:hover {
-    background: #505050;
-  }
-
-  ul::-webkit-scrollbar-corner {
-    background: rgb(30, 30, 30);
-  }
-
-  ul::-webkit-scrollbar-button {
-    display: none;
-  }
-
-  ul::-webkit-scrollbar-track-piece {
-    background: rgb(30, 30, 30);
   }
 </style>
