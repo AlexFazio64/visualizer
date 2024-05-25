@@ -1,51 +1,87 @@
 <script>
   import ForceGraph from "./ForceGraph.svelte";
   import NavBar from "./NavBar.svelte";
+  import Search from "./Search.svelte";
   import SideBar from "./SideBar.svelte";
+  import { onMount } from "svelte";
 
-  // clear the graph
+  let show_search = false;
+
   let toggle = false;
-
-  // show info on nodes
   let edges = [];
   let selected_arr = [];
-  let categories = new Map();
-  let set = new Set();
+  let categories_map = new Map();
+  let categories_set = new Set();
   let degrees = new Map();
+  let filter = { degrees: -1, categories: new Set() };
+
+  function handle_clear(_e) {
+    show_search = false;
+    filter = { degrees: 0, categories: new Set() };
+    toggle = true;
+  }
+
+  function handle_cleared(_e) {
+    toggle = false;
+  }
+
+  function handle_selection(event) {
+    selected_arr = event.detail.arr;
+    edges = event.detail.edges;
+  }
+
+  function handle_categories(event) {
+    let new_set = new Set();
+    categories_map = event.detail.categories;
+    categories_map.forEach((value) => {
+      value.forEach((v) => {
+        new_set.add(v.text);
+      });
+    });
+    categories_set = new_set;
+  }
+
+  function handle_degrees(event) {
+    degrees = event.detail.degrees;
+  }
+
+  function handle_filter({ detail }) {
+    filter.degrees = detail.degrees;
+    filter.categories = detail.categories;
+    filter = filter;
+  }
+
+  onMount(() => {
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") handle_clear();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "p" && e.altKey) show_search = !show_search;
+    });
+  });
+
+  function handle_search(event) {
+    show_search = false;
+    filter.node = event.detail.query;
+    filter = filter;
+  }
 </script>
 
 <main>
-  <SideBar {selected_arr} {edges} {categories} {degrees} />
-  <NavBar
-    {set}
-    on:clear={() => {
-      toggle = true;
-    }}
-  />
+  {#if show_search}
+    <Search on:search={handle_search} />
+  {/if}
+
+  <SideBar {selected_arr} {edges} {categories_map} {degrees} />
+  <NavBar on:clear={handle_clear} on:filter={handle_filter} {categories_set} />
   <ForceGraph
+    on:cleared={handle_cleared}
+    on:selection={handle_selection}
+    on:categories={handle_categories}
+    on:degrees={handle_degrees}
     {toggle}
-    on:cleared={() => {
-      toggle = false;
-    }}
-    on:selection={(event) => {
-      selected_arr = event.detail.arr;
-      edges = event.detail.edges;
-    }}
-    on:categories={(event) => {
-      let new_set = new Set();
-      categories = event.detail.categories;
-
-      categories.forEach((value) => {
-        value.forEach((v) => {
-          new_set.add(v.text);
-        });
-      });
-
-      set = new_set;
-    }}
-    on:degrees={(event) => {
-      degrees = event.detail.degrees;
-    }}
+    {filter}
   />
 </main>
 

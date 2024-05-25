@@ -2,33 +2,61 @@
   import { createEventDispatcher } from "svelte";
   const dispatch = createEventDispatcher();
 
-  export let set = new Set();
-  //   export let value = 0;
+  export let categories_set = new Set();
+  $: categories_set = Array.from(categories_set).sort();
 
-  //   function handleInput(event) {
-  //     value = event.target.value;
-  //   }
+  let categories = new Set();
+  let degrees = 0;
 
-  $: set = Array.from(set).sort();
+  function sendFilter({ target }) {
+    const category = target.title ? target.title : null;
+    if (category !== null) {
+      target.classList.toggle("selected");
+      categories.has(category)
+        ? categories.delete(category)
+        : categories.add(category);
+    }
+    categories = categories;
+
+    dispatch("filter", { degrees, categories });
+  }
+
+  function clear(_e) {
+    document.querySelectorAll("section>button").forEach((button) => {
+      button.classList.remove("selected");
+    });
+    
+    categories = new Set();
+    degrees = -1;
+    dispatch("filter", { degrees, categories });
+    dispatch("clear");
+  }
 </script>
 
 <nav>
   <section>
     <span></span>
-    {#each set as category}
-      <button title={category}>{category}</button>
+    {#each categories_set as category}
+      <button title={category} on:click={sendFilter}>{category}</button>
     {/each}
     <span></span>
   </section>
 
-  <!-- <input type="range" min="0" max="100" {value} on:input={handleInput} /> -->
+  <div>
+    <input
+      type="number"
+      min="-1"
+      max="250"
+      value={degrees}
+      on:input={(e) => (degrees = e.target.value)}
+      on:blur={sendFilter}
+      on:keypress={(e) => {
+        if (e.key === "Enter") sendFilter(e);
+      }}
+    />
+  </div>
 
-  <button
-    class="clear"
-    on:click={() => {
-      dispatch("clear");
-    }}>Clear</button
-  >
+  <button class="clear selected" on:click={clear}>Clear</button>
 </nav>
 
 <style>
@@ -63,12 +91,11 @@
     width: 80px;
     font-size: 1rem;
     align-self: center;
-    background-color: hsl(0, 68%, 38%);
   }
 
   button {
     border: none;
-    background-color: hsl(0, 44%, 38%);
+    background-color: hsl(0, 0%, 18%);
     color: white;
     text-transform: uppercase;
     font-size: 0.7rem;
@@ -78,8 +105,12 @@
     white-space: nowrap;
   }
 
+  .selected {
+    background-color: hsl(0, 68%, 38%);
+  }
+
   nav::before,
-  nav::after {
+  div::before {
     content: "";
     width: 60px;
     height: 100%;
@@ -96,13 +127,33 @@
     );
   }
 
-  nav::after {
-    right: 80px;
+  div::before {
+    left: -60px;
     background: linear-gradient(
       to left,
       rgba(24, 26, 27, 1) 10%,
       rgba(24, 26, 27, 0) 100%
     );
+  }
+
+  div {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  input {
+    width: 60px;
+    height: 100%;
+    background: none;
+    color: white;
+    border: none;
+    text-align: center;
+    font-size: 1rem;
+  }
+
+  input:focus {
+    outline: none;
   }
 
   section::-webkit-scrollbar {
