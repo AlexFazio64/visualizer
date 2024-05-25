@@ -13,9 +13,23 @@
     dispatch("cleared");
   }
 
-  $: if (selected_arr || edges) {
-    dispatch("selection", { arr: selected_arr, edges: edges });
+  $: if (selected_arr) {
+    if (selected_arr.length === 2)
+      edges = graph.getEdges(
+        selected_arr[0].__data__.id,
+        selected_arr[1].__data__.id,
+        nodes,
+        url_id
+      );
+    else edges = [];
+    dispatch("selection", {
+      arr: selected_arr.map((d) => d.__data__.id),
+      edges: edges,
+    });
   }
+
+  $: if (selected) info.root = selected.__data__.id;
+  $: if (selected === null) info.root = "";
 
   let svg;
   let edges = [];
@@ -28,26 +42,18 @@
   const height = 590;
   const color = d3.scaleOrdinal(d3.schemeCategory10);
 
-  function highlight(circle, highlight = true) {
-    if (highlight) {
-      d3.select(circle)
-        .attr("fill", "white")
-        .attr("r", 15)
-        .attr("stroke-width", 2)
-        .attr("stroke", (d) => color(degrees.get(d.id)));
-    } else {
-      d3.select(circle)
-        .attr("fill", (d) => color(degrees.get(d.id)))
-        .attr("r", 10)
-        .attr("stroke-width", 1)
-        .attr("stroke", "white");
-    }
+  function highlight(c, highlight = true) {
+    const node_color = color(degrees.get(c.__data__.id));
+    c.attributes.getNamedItem("r").value = highlight ? 15 : 10;
+    c.attributes.getNamedItem("fill").value = highlight ? "red" : node_color;
+    c.attributes.getNamedItem("stroke-width").value = highlight ? 3 : 1;
+    c.attributes.getNamedItem("stroke").value = highlight ? "#1e1e1e" : "#fff";
   }
 
   const nodes = [];
   const links = [];
   let degrees = new Map();
-  const map = new Map();
+  const url_id = new Map();
 
   onMount(async () => {
     const files = await fetch("/api/files")
@@ -56,9 +62,10 @@
         return data;
       });
 
-    await graph.make_nodes(nodes, map, files);
-    graph.make_links(nodes, map, links);
+    await graph.make_nodes(nodes, url_id, files);
+    graph.make_links(nodes, url_id, links);
     degrees = graph.getDegrees(nodes, links);
+    dispatch("degrees", { degrees });
 
     categories = await graph.getCategories(nodes);
     dispatch("categories", { categories });
@@ -75,25 +82,32 @@
 
     const g = svg.append("g");
 
-    function showLabel(_event, d) {
-      if (selected !== d.id) d3.select(this).attr("fill", "blue");
+    function mouseover(_event, d) {
+      if (!selected || (selected && selected.__data__.id !== d.id))
+        d3.select(this).attr("fill", "blue");
       info.hovered = d.id;
     }
 
-    function hideLabel() {
-      if (selected !== d3.select(this).data()[0].id)
+    function mouseout() {
+      if (
+        !selected ||
+        (selected && selected.__data__.id !== d3.select(this).data()[0].id)
+      )
         d3.select(this).attr("fill", (d) => color(degrees.get(d.id)));
       info.hovered = "";
     }
 
     function updateGraph() {
-      // Filter links based on the selected node
-      let filteredLinks = links.filter(
-        (d) => d.source.id === selected || d.target.id === selected
-      );
+      let filteredLinks;
 
-      if (selected === null) {
+      if (selected === null || selected === undefined) {
         filteredLinks = links;
+      } else {
+        filteredLinks = links.filter(
+          (d) =>
+            d.source.id === selected.__data__.id ||
+            d.target.id === selected.__data__.id
+        );
       }
 
       // Get the ids of nodes connected to the selected node
@@ -107,7 +121,7 @@
       if (selected === null) {
         filteredNodes = nodes;
       } else if (connectedNodeIds.size === 0) {
-        filteredNodes = nodes.filter((d) => d.id === selected);
+        filteredNodes = nodes.filter((d) => d.id === selected.__data__.id);
       }
 
       // Update links
@@ -140,8 +154,8 @@
         .attr("stroke", "#fff")
         .attr("stroke-width", 1)
         .attr("fill", (d) => color(degrees.get(d.id)))
-        .on("mouseover", showLabel)
-        .on("mouseout", hideLabel)
+        .on("mouseover", mouseover)
+        .on("mouseout", mouseout)
         .on("click", click)
         .merge(nodeSelection)
         .attr("cx", (d) => d.x)
@@ -151,48 +165,38 @@
       g.selectAll("circle").raise();
     }
 
-    async function click(_event) {
-      dispatch("hello", { node: d3.select(this).data()[0] });
-
-      const d = d3.select(this).data()[0];
+    function click(_event) {
+      const circle = d3.select(this)._groups[0][0];
 
       if (_event.shiftKey) {
-        if (selected_arr.includes(d.id)) {
-          selected_arr = selected_arr.filter((id) => id !== d.id);
-          highlight(this, false);
+        if (selected) {
+          highlight(selected, false);
+          if (selected.__data__.id !== circle.__data__.id) {
+            selected = circle;
+            highlight(selected);
+          } else selected = null;
         } else {
-          selected_arr = [...selected_arr, d.id];
-          highlight(this);
+          selected = circle;
+          highlight(selected);
         }
 
-        if (selected_arr.length === 2) {
-          const [id1, id2] = selected_arr;
-          edges = await graph.getStats(id1, id2, nodes, links, map);
-        } else {
-          edges = [];
-        }
+        updateGraph();
+      } else {
+        selected_arr.find((d) => d.__data__.id === circle.__data__.id)
+          ? selected_arr.splice(selected_arr.indexOf(circle), 1) &&
+            highlight(circle, false)
+          : selected_arr.push(circle) && highlight(circle);
 
-        return;
+        selected_arr = [...new Set(selected_arr)];
+        if (selected) highlight(selected);
       }
-
-      if (selected === d.id) {
-        selected = null;
-        info.root = "";
-        highlight(this, false);
-      } else if (selected === null) {
-        selected = d.id;
-        info.root = d.id;
-        highlight(this);
-      }
-
-      updateGraph();
     }
 
     const simulation = d3
       .forceSimulation(nodes)
-      .force("charge", d3.forceManyBody().strength(-1000))
       .force("x", d3.forceX())
       .force("y", d3.forceY())
+      .force("charge", d3.forceManyBody().strength(-1000))
       .force(
         "link",
         d3
@@ -213,7 +217,6 @@
         .attr("cy", (d) => d.y);
     });
 
-    // Initialize links and nodes
     updateGraph();
 
     function drag(simulation) {
@@ -243,18 +246,14 @@
   });
 
   function clear() {
-    d3.selectAll("circle")._groups[0].forEach((circle) => {
-      if (circle.attributes.getNamedItem("r").value === "15") {
-        circle.dispatchEvent(new MouseEvent("click"));
-      }
-    });
-    selected_arr.forEach((id) => {
-      d3.selectAll("circle")._groups[0].forEach((circle) => {
-        if (circle.__data__.id === id) {
-          circle.dispatchEvent(new MouseEvent("click", { shiftKey: true }));
-        }
-      });
-    });
+    if (selected) {
+      highlight(selected, false);
+      selected.dispatchEvent(new MouseEvent("click", { shiftKey: true }));
+    }
+
+    for (const node of selected_arr) {
+      highlight(node, false);
+    }
     selected_arr = [];
   }
 </script>
@@ -311,7 +310,7 @@
   }
 
   .root {
-    color: white;
+    color: red;
   }
 
   .hover {

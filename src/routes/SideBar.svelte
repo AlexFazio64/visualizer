@@ -2,13 +2,15 @@
   export let selected_arr = [];
   export let edges = [];
   export let categories = new Map();
+  export let degrees = new Map();
 </script>
 
 <div>
   {#if selected_arr.length !== 0}
     <p class="sticky">Nodes</p>
     {#each selected_arr as item}
-      <p class="node">{item}</p>
+	<p class="node">{item}</p>
+	<p class="node">Degree: {degrees.get(item)}</p>
       {#if categories.has(item)}
         {#each categories.get(item) as category}
           <p class="category">{category.text}</p>

@@ -11,10 +11,11 @@
   let selected_arr = [];
   let categories = new Map();
   let set = new Set();
+  let degrees = new Map();
 </script>
 
 <main>
-  <SideBar {selected_arr} {edges} {categories} />
+  <SideBar {selected_arr} {edges} {categories} {degrees} />
   <NavBar
     {set}
     on:clear={() => {
@@ -33,7 +34,7 @@
     on:categories={(event) => {
       let new_set = new Set();
       categories = event.detail.categories;
-      
+
       categories.forEach((value) => {
         value.forEach((v) => {
           new_set.add(v.text);
@@ -41,6 +42,9 @@
       });
 
       set = new_set;
+    }}
+    on:degrees={(event) => {
+      degrees = event.detail.degrees;
     }}
   />
 </main>

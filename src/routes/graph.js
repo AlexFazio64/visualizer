@@ -44,42 +44,6 @@ export function make_nodes(wiki_nodes, url_to_dir, files) {
   return Promise.all(promises);
 }
 
-export function check(wiki_nodes, wiki_links) {
-  const invalid_links = new Set();
-
-  for (const link of wiki_links) {
-    let found_source = false;
-    for (const node of wiki_nodes) {
-      if (node.id === link.source) {
-        found_source = true;
-        break;
-      }
-    }
-    if (!found_source) {
-      invalid_links.add(`${link.source} [s]`);
-      console.log(link);
-    }
-
-    // search for target in nodes array
-    let found_target = false;
-    for (const node of wiki_nodes) {
-      if (node.id === link.target) {
-        found_target = true;
-        break;
-      }
-    }
-    if (!found_target) {
-      invalid_links.add(`${link.target} [t]`);
-      console.log(link);
-    }
-  }
-
-  // sort alphabetically and print
-  const invalid_links_array = Array.from(invalid_links);
-  invalid_links_array.sort();
-  for (const link of invalid_links_array) console.log(link);
-}
-
 export async function getCategories() {
   let categories = await fetch("/api/categories").then((response) =>
     response.json()
@@ -120,8 +84,7 @@ export function degrees(map) {
   return { max, min };
 }
 
-export async function getStats(id1, id2, nodes, links, map) {
-  //find id1 and id2 in nodes
+export function getEdges(id1, id2, nodes, url_id) {
   let node1 = null;
   let node2 = null;
   for (let node of nodes) {
@@ -129,13 +92,6 @@ export async function getStats(id1, id2, nodes, links, map) {
     if (node.id === id2) node2 = node;
 
     if (node1 && node2) break;
-  }
-
-  //find links between id1 and id2
-  let edges = [];
-  for (let link of links) {
-    if (link.source.id === id1 && link.target.id === id2) edges.push(link);
-    if (link.source.id === id2 && link.target.id === id1) edges.push(link);
   }
 
   function getInfo(node, other, map) {
@@ -161,8 +117,8 @@ export async function getStats(id1, id2, nodes, links, map) {
   }
 
   let info = [];
-  Array.prototype.push.apply(info, getInfo(node1, node2, map));
-  Array.prototype.push.apply(info, getInfo(node2, node1, map));
+  Array.prototype.push.apply(info, getInfo(node1, node2, url_id));
+  Array.prototype.push.apply(info, getInfo(node2, node1, url_id));
 
   info = info.filter((text) => text.length > 0);
 
