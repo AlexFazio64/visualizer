@@ -1,10 +1,13 @@
 better UI [done]
 make api for categories [done]
 isolation of nodes/edges [done]
+show subgraph based on selected nodes [done]
+filter by category [done]
+filter by degree threshold [done]
+plotting of degree distribution [done]
 
-show subgraph based on selected nodes [to do]
-filter by category [in progress]
-filter by degree threshold [in progress]
-find shortest path between two nodes [to do]
+move wiki data to local directory [to do]
+update api to serve local data [to do]
 
+find shortest path between two nodes [optional]
 bubble chart based on degree on node [optional]
