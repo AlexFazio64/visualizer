@@ -238,11 +238,17 @@
         filteredNodes.some((n) => n.id === d.target.id)
     );
 
-    // Update links
-    const linkSelection = g
-      .selectAll("line")
-      .data(filteredLinks, (d) => `${d.source.id}-${d.target.id}`);
-    linkSelection.exit().remove();
+    let linkSelection;
+    try {
+      linkSelection = g
+        .selectAll("line")
+        .data(filteredLinks, (d) => `${d.source.id}-${d.target.id}`);
+      linkSelection.exit().remove();
+    } catch (error) {
+      console.error("oops");
+      return;
+    }
+
     linkSelection
       .enter()
       .append("line")
@@ -255,7 +261,6 @@
       .attr("x2", (d) => d.target.x)
       .attr("y2", (d) => d.target.y);
 
-    // Update nodes
     const nodeSelection = g
       .selectAll("circle")
       .data(filteredNodes, (d) => d.id);

@@ -8,6 +8,9 @@
 <div class="side">
   {#if selected_arr.length === 0}
     <div class="help">
+      <code>CTRL+ALT+D</code>
+      <p class="hint">(show / hide) degree distribution</p>
+
       <code>ALT+P</code>
       <p class="hint">(show / hide) search bar</p>
 

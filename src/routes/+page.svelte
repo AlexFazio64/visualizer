@@ -3,9 +3,11 @@
   import NavBar from "./NavBar.svelte";
   import Search from "./Search.svelte";
   import SideBar from "./SideBar.svelte";
+  import Distribution from "./Distribution.svelte";
   import { onMount } from "svelte";
 
   let show_search = false;
+  let show_distribution = false;
 
   let toggle = false;
   let edges = [];
@@ -14,6 +16,7 @@
   let categories_set = new Set();
   let degrees = new Map();
   let filter = { degrees: -1, categories: new Set() };
+  let dist_filter = "";
 
   function handle_clear(_e) {
     show_search = false;
@@ -46,8 +49,20 @@
   }
 
   function handle_filter({ detail }) {
-    filter.degrees = detail.degrees;
-    filter.categories = detail.categories;
+    if (show_distribution) {
+      const val = detail.categories.values().next().value;
+      dist_filter = val;
+      return;
+    } else {
+      filter.categories = detail.categories;
+      filter.degrees = detail.degrees;
+    }
+    filter = filter;
+  }
+
+  function handle_search(event) {
+    show_search = false;
+    filter.node = event.detail.query;
     filter = filter;
   }
 
@@ -59,13 +74,12 @@
     document.addEventListener("keydown", (e) => {
       if (e.key === "p" && e.altKey) show_search = !show_search;
     });
-  });
 
-  function handle_search(event) {
-    show_search = false;
-    filter.node = event.detail.query;
-    filter = filter;
-  }
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "d" && e.altKey && e.ctrlKey)
+        show_distribution = !show_distribution;
+    });
+  });
 </script>
 
 <main>
@@ -74,15 +88,25 @@
   {/if}
 
   <SideBar {selected_arr} {edges} {categories_map} {degrees} />
-  <NavBar on:clear={handle_clear} on:filter={handle_filter} {categories_set} />
-  <ForceGraph
-    on:cleared={handle_cleared}
-    on:selection={handle_selection}
-    on:categories={handle_categories}
-    on:degrees={handle_degrees}
-    {toggle}
-    {filter}
+  <NavBar
+    on:clear={handle_clear}
+    on:filter={handle_filter}
+    {categories_set}
+    {show_distribution}
   />
+
+  {#if show_distribution}
+    <Distribution {degrees} {categories_map} {dist_filter} />
+  {:else}
+    <ForceGraph
+      on:cleared={handle_cleared}
+      on:selection={handle_selection}
+      on:categories={handle_categories}
+      on:degrees={handle_degrees}
+      {toggle}
+      {filter}
+    />
+  {/if}
 </main>
 
 <style>

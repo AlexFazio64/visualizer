@@ -2,6 +2,7 @@
   import { createEventDispatcher } from "svelte";
   const dispatch = createEventDispatcher();
 
+  export let show_distribution = false;
   export let categories_set = new Set();
   $: categories_set = Array.from(categories_set).sort();
 
@@ -12,9 +13,21 @@
     const category = target.title ? target.title : null;
     if (category !== null) {
       target.classList.toggle("selected");
-      categories.has(category)
-        ? categories.delete(category)
-        : categories.add(category);
+
+      if (!show_distribution) {
+        categories.has(category)
+          ? categories.delete(category)
+          : categories.add(category);
+      } else {
+        if (categories.has(category)) categories = new Set();
+        else {
+          categories = new Set([category]);
+          document.querySelectorAll("section>button").forEach((button) => {
+            button.classList.remove("selected");
+          });
+          target.classList.add("selected");
+        }
+      }
     }
     categories = categories;
 
@@ -25,7 +38,7 @@
     document.querySelectorAll("section>button").forEach((button) => {
       button.classList.remove("selected");
     });
-    
+
     categories = new Set();
     degrees = -1;
     dispatch("filter", { degrees, categories });
