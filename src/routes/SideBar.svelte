@@ -3,6 +3,14 @@
   export let edges = [];
   export let categories_map = new Map();
   export let degrees = new Map();
+
+  async function description(item) {
+    const resp = await fetch(
+      `/api/description?dir=${item.includes("&") ? item.replace("&", "%26") : item}`
+    );
+
+    return await resp.json();
+  }
 </script>
 
 <div class="side">
@@ -44,10 +52,19 @@
     {#each selected_arr as item}
       <p class="node">{item}</p>
       <p class="node">Degree: {degrees.get(item)}</p>
+
       {#if categories_map.has(item)}
         {#each categories_map.get(item) as category}
           <p class="category">{category.text}</p>
         {/each}
+      {/if}
+
+      {#if selected_arr.length === 1}
+        {#await description(item)}
+          <p class="node">Loading...</p>
+        {:then data}
+          <p class="node">{data}</p>
+        {/await}
       {/if}
     {/each}
   {/if}
@@ -68,7 +85,7 @@
     grid-template-columns: auto auto;
     align-content: center;
     align-items: center;
-	gap: 7px 10px;
+    gap: 7px 10px;
 
     font-size: 0.7rem;
     color: rgb(98, 98, 98);
@@ -86,7 +103,7 @@
   }
 
   .no-key {
-	margin: 0;
+    margin: 0;
     grid-column: 1 / 3;
     text-align: justify;
   }
