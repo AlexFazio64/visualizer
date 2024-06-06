@@ -47,7 +47,7 @@
 </script>
 
 <nav>
-  <section>
+  <section id="categories">
     <span></span>
     {#each categories_set as category}
       <button title={category} on:click={sendFilter}>{category}</button>

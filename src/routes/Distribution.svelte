@@ -39,7 +39,7 @@
     const counts = Object.values(degreeCounts);
 
     const svg = d3.select("svg"),
-      margin = { top: 30, right: 20, bottom: 30, left: 60 };
+      margin = { top: 40, right: 20, bottom: 50, left: 70 };
 
     let width, height;
 
@@ -58,11 +58,23 @@
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    const x = d3
+    const maxBarWidth = 30;
+    const barPadding = 0.1;
+
+    let x = d3
       .scaleBand()
       .domain(degrees)
-      .rangeRound([0, width])
-      .padding(0.1);
+      .range([0, width])
+      .padding(barPadding);
+
+    let barWidth = x.bandwidth();
+    if (barWidth > maxBarWidth) {
+      x = d3
+        .scaleBand()
+        .domain(degrees)
+        .range([0, degrees.length * (maxBarWidth + maxBarWidth * barPadding)])
+        .padding(barPadding);
+    }
 
     const y = d3
       .scaleLinear()
@@ -72,17 +84,32 @@
 
     g.append("g")
       .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(x).tickFormat((d) => d));
+      .call(d3.axisBottom(x).tickFormat((d) => d))
+      .selectAll("text")
+      .attr("fill", "white")
+      .attr("dy", "0.35em")
+      .attr("x", 10)
+      .attr("y", 10)
+      .attr("transform", "rotate(45)")
+      .style("text-anchor", "start");
+
+    svg
+      .append("text")
+      .attr("fill", "white")
+      .attr("x", margin.left + width / 2)
+      .attr("y", height + margin.top + margin.bottom)
+      .attr("text-anchor", "middle")
+      .attr("font-size", "10px")
+      .text("Degree");
 
     g.append("g")
       .call(d3.axisLeft(y).ticks(10, "d"))
       .append("text")
-      .attr("class", "axis-label")
       .attr("fill", "white")
       .attr("transform", "rotate(-90)")
-      .attr("y", 6)
+      .attr("y", -50)
       .attr("dy", "0.71em")
-      .attr("text-anchor", "end")
+      .attr("text-anchor", "middle")
       .text("Count");
 
     g.selectAll(".bar")
@@ -94,6 +121,7 @@
       .attr("y", (d) => y(degreeCounts[d]))
       .attr("width", x.bandwidth())
       .attr("height", (d) => height - y(degreeCounts[d]))
+      .attr("fill", "white")
       .on("mouseover", function (d) {
         d3.select(this).attr("fill", "steelblue");
         _x = d.srcElement.__data__;
@@ -104,6 +132,17 @@
         _x = -1;
         _y = -1;
       });
+
+    g.selectAll(".bar-text")
+      .data(degrees)
+      .enter()
+      .append("text")
+      .attr("x", (d) => x(d) + x.bandwidth() / 2)
+      .attr("y", (d) => y(degreeCounts[d]) - 5)
+      .attr("text-anchor", "middle")
+      .attr("fill", "white")
+      .attr("font-size", ".8em")
+      .text((d) => degreeCounts[d]);
   }
 
   onMount(() => {
@@ -111,15 +150,18 @@
   });
 </script>
 
-<section>
+<section id="distribution">
   <span>
-    <p>Degree Distribution</p>
+    <p>
+      Degree Distribution {dist_filter
+        ? ": " + dist_filter
+        : ": all categories"}
+    </p>
     <p>{_x >= 0 ? "Degree: " + _x : ""}</p>
     <p>{_y >= 0 ? "#Nodes: " + _y : ""}</p>
   </span>
   <svg width="1200" height="590"></svg>
 </section>
-<text class="bar axis-label"></text>
 
 <style>
   span {
@@ -147,14 +189,15 @@
     background: rgb(30, 30, 30);
     border: 1px solid #606060;
 
-    fill: white;
-    color: white;
     font-size: 1rem;
     font-family: sans-serif;
 
     height: 100%;
     width: 100%;
     box-sizing: border-box;
+
+    color: white;
+    fill: white;
   }
 
   section {
@@ -165,15 +208,5 @@
     flex-direction: column;
     align-items: center;
     justify-content: space-evenly;
-  }
-
-  .bar {
-    fill: steelblue;
-  }
-  .bar:hover {
-    fill: orange;
-  }
-  .axis-label {
-    font-size: 12px;
   }
 </style>
