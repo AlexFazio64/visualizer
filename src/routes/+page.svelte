@@ -22,6 +22,9 @@
     show_search = false;
     filter = { degrees: 0, categories: new Set() };
     toggle = true;
+
+    const clear = document.querySelector("button.clear");
+    if (clear) clear.click();
   }
 
   function handle_cleared(_e) {

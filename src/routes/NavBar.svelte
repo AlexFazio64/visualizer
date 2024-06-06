@@ -35,12 +35,13 @@
   }
 
   function clear(_e) {
-    document.querySelectorAll("section>button").forEach((button) => {
+    categories = new Set();
+    degrees = -1;
+
+    document.querySelectorAll("section>button.selected").forEach((button) => {
       button.classList.remove("selected");
     });
 
-    categories = new Set();
-    degrees = -1;
     dispatch("filter", { degrees, categories });
     dispatch("clear");
   }
