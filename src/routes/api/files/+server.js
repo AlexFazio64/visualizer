@@ -1,18 +1,13 @@
 import fs from "fs";
 import path from "path";
 
-const PATH = path.join(
-  "D:",
-  "AlexFazio64",
-  "Dev",
-  "masters",
-  "scraper",
-  "content"
-);
+const PATH = path.join("wiki");
 
 export function GET() {
   try {
-    const files = fs.readdirSync(PATH);
+    const files = fs
+      .readdirSync(PATH)
+      .filter((file) => file !== "categories.json");
     return new Response(JSON.stringify(files), {
       headers: {
         type: "application/json",

@@ -5,9 +5,8 @@ show subgraph based on selected nodes [done]
 filter by category [done]
 filter by degree threshold [done]
 plotting of degree distribution [done]
-
-move wiki data to local directory [to do]
-update api to serve local data [to do]
+move wiki data to local directory [done]
+update api to serve local data [done]
 
 find shortest path between two nodes [optional]
 bubble chart based on degree on node [optional]

@@ -1,14 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-const PATH = path.join(
-  "D:",
-  "AlexFazio64",
-  "Dev",
-  "masters",
-  "scraper",
-  "content"
-);
+const PATH = path.join("wiki");
 
 export function GET(req) {
   try {

@@ -1,0 +1,40 @@
+{
+  "id": "Hanekawa Residence",
+  "url": "https://bakemonogatari.fandom.com/wiki/Hanekawa_Residence",
+  "toc": [
+    {
+      "#Plot": [
+        "#Tsubasa_Family",
+        "#Tsubasa_Tiger"
+      ]
+    },
+    "#Appears_In",
+    {
+      "#Gallery": [
+        "#The_Current_House",
+        "#The_Previous_House"
+      ]
+    }
+  ],
+  "Description": "The Hanekawa Residence is the current home of the Hanekawa family. Their previous house was destroyed in a fire.",
+  "#Tsubasa_Family": {
+    "link": [],
+    "text": ""
+  },
+  "#Tsubasa_Tiger": {
+    "link": [],
+    "text": ""
+  },
+  "#Appears_In": {
+    "link": [],
+    "text": ""
+  },
+  "#The_Current_House": {
+    "link": [],
+    "text": ""
+  },
+  "#The_Previous_House": {
+    "link": [],
+    "text": ""
+  }
+}
