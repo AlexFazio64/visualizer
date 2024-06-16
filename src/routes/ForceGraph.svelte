@@ -79,31 +79,51 @@
   let url_id = new Map();
 
   onMount(async () => {
-    nodes = await fetch("/visualizer/nodes.json")
+    nodes = await fetch(
+      process.env.NODE_ENV !== "development"
+        ? "/nodes.json"
+        : "/visualizer/nodes.json"
+    )
       .then((res) => res.json())
       .then((data) => {
         return data;
       });
 
-    links = await fetch("/visualizer/links.json")
+    links = await fetch(
+      process.env.NODE_ENV !== "development"
+        ? "/links.json"
+        : "/visualizer/links.json"
+    )
       .then((res) => res.json())
       .then((data) => {
         return data;
       });
 
-    degrees = await fetch("/visualizer/degrees.json")
+    degrees = await fetch(
+      process.env.NODE_ENV !== "development"
+        ? "/degrees.json"
+        : "/visualizer/degrees.json"
+    )
       .then((res) => res.json())
       .then((data) => {
         return new Map(data);
       });
 
-    url_id = await fetch("/visualizer/urls.json")
+    url_id = await fetch(
+      process.env.NODE_ENV !== "development"
+        ? "/urls.json"
+        : "/visualizer/urls.json"
+    )
       .then((res) => res.json())
       .then((data) => {
         return new Map(data);
       });
 
-    categories = await fetch("/visualizer/categories.json")
+    categories = await fetch(
+      process.env.NODE_ENV !== "development"
+        ? "/categories.json"
+        : "/visualizer/categories.json"
+    )
       .then((res) => res.json())
       .then((data) => {
         return new Map(data);

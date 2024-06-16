@@ -152,7 +152,11 @@
   onMount(async () => {
     plot(degrees);
 
-    links = await fetch("/visualizer/links.json")
+    links = await fetch(
+      process.env.NODE_ENV !== "development"
+        ? "/links.json"
+        : "/visualizer/links.json"
+    )
       .then((res) => res.json())
       .then((data) => {
         return data;
