@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="./favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+		<link href="./_app/immutable/assets/2.KkldeDix.css" rel="stylesheet">
+		<link rel="modulepreload" href="./_app/immutable/entry/start.CUsqUFyy.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/entry.BtTVy4Xa.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/scheduler.mIGFAMsG.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/app.DP74kBPW.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/index.OuaXk_xI.js">
+		<link rel="modulepreload" href="./_app/immutable/nodes/0.CI4CKeLj.js">
+		<link rel="modulepreload" href="./_app/immutable/nodes/2.yjoZTL7_.js">
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+        min-width: 100vw;
+        min-height: 100vh;
+        background-color: #181a1b;
+      }
+    </style>
+  </head>
+  <body data-sveltekit-preload-data="hover">
+    <div style="display: contents">  <main class="svelte-c4dur0"> <div class="side svelte-1av388z"><div class="help svelte-1av388z" data-svelte-h="svelte-1h8i2m3"><code class="svelte-1av388z">CTRL+ALT+D</code> <p class="hint">(show / hide) degree distribution</p> <code class="svelte-1av388z">ALT+P</code> <p class="hint">(show / hide) search bar</p> <code class="svelte-1av388z">ESC</code> <p class="hint">hide search bar</p> <code class="svelte-1av388z">ESC</code> <p class="hint">reset graph</p> <code class="svelte-1av388z">LMB</code> <p class="hint">(show / hide) node info</p> <code class="svelte-1av388z">LMB+SHIFT</code> <p class="hint">set node as graph root</p> <code class="svelte-1av388z">MWheel U/D</code> <p class="hint">scale the graph</p> <code class="svelte-1av388z">LMB (drag)</code> <p class="hint">(on empty space) pan the graph</p> <code class="svelte-1av388z">LMB (drag)</code> <p class="hint">(on node) drag the node</p> <p class="no-key svelte-1av388z">select 2 nodes to show edges</p> <p class="no-key svelte-1av388z">filter nodes by degree by changing value</p> <p class="no-key svelte-1av388z">filter nodes by category</p></div>   </div> <nav class="svelte-5z9ov6"><section id="categories" class="svelte-5z9ov6"><span></span>  <span></span></section> <div class="svelte-5z9ov6"><input type="number" min="-1" max="250" value="0" class="svelte-5z9ov6"></div> <button class="clear selected svelte-5z9ov6" data-svelte-h="svelte-11ntnzt">Clear</button> </nav> <section class="svelte-1cg85u7"><span class="svelte-1cg85u7"><p class="svelte-1cg85u7" data-svelte-h="svelte-1uvqceq">Root:</p> <p class="root svelte-1cg85u7"></p> <p class="svelte-1cg85u7" data-svelte-h="svelte-1opj1vh">Hovered:</p> <p class="hover svelte-1cg85u7"></p></span> <svg class="svelte-1cg85u7"></svg> </section> </main> 
+			
+			<script>
+				{
+					__sveltekit_o07alu = {
+						base: new URL(".", location).pathname.slice(0, -1)
+					};
+
+					const element = document.currentScript.parentElement;
+
+					const data = [null,null];
+
+					Promise.all([
+						import("./_app/immutable/entry/start.CUsqUFyy.js"),
+						import("./_app/immutable/entry/app.DP74kBPW.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element, {
+							node_ids: [0, 2],
+							data,
+							form: null,
+							error: null
+						});
+					});
+				}
+			</script>
+		</div>
+  </body>
+</html>
