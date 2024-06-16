@@ -1,14 +1,16 @@
 <script>
   import * as d3 from "d3";
   import { onMount } from "svelte";
-  import { assortativity } from "./graph";
+  import { assortativity, discrete_assortativity } from "./graph";
 
   export let degrees = new Map();
   export let categories_map = new Map();
+  export let categories_set = new Set();
   export let dist_filter = undefined;
 
   let coefficient = 0;
   let links = [];
+  let nodes = [];
 
   let _x = -1;
   let _y = -1;
@@ -162,11 +164,21 @@
         return data;
       });
 
+    nodes = await fetch(
+      process.env.NODE_ENV === "development"
+        ? "/nodes.json"
+        : "/visualizer/nodes.json"
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        return data;
+      });
+
     coefficient = assortativity(links, degrees);
     coefficient = Math.round(coefficient * 1000) / 1000;
+
+    discrete_assortativity(links, categories_set, categories_map);
   });
-
-
 </script>
 
 <section id="distribution">

@@ -99,7 +99,7 @@
   />
 
   {#if show_distribution}
-    <Distribution {degrees} {categories_map} {dist_filter} />
+    <Distribution {degrees} {categories_map} {dist_filter} {categories_set} />
   {:else}
     <ForceGraph
       on:cleared={handle_cleared}

@@ -14,12 +14,12 @@ where $j_i$ and $k_i$ are the degrees of the two nodes at the ends of edge $i$, 
 
 The paper [Assortative Mixing in Networks](https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.89.208701?casa_token=71SGpQk7KG8AAAAA%3AARTHqgrk8AzR5UE4-SwlAogKC9UQxa3ige-tZLalrN2Klg8zti25M_acfLYAufzKbR96cg2ReyI5cGs) by M. E. J. Newman discusses the assortativity coefficient in more detail.
 
-## Discrete Assortativity Coefficient
+## Discrete Assortativity Mixing
 
-The Discrete Assortativity Coefficient is a simplified version of the assortativity coefficient that is easier to calculate. It is defined as:
+The Discrete Assortativity Mixing is a simplified version of the assortativity coefficient that is easier to calculate. It is defined as:
 
 $$
 	r = \frac{\sum_{i=1} e_{ii} - \sum_{i=1} a_i b_i}{1 - \sum_{i=1} a_i b_i}
 $$
 
-where $e_{ij}$ is the fraction of edges that connect nodes of type $i$ to nodes of type $j$, and $a_i$ and $b_i$ are the fractions of the ends of edges that are attached to nodes of type $i$.
+where $e_{ii}$ is the fraction of edges that connect nodes of type $i$ to nodes of type $j$, and $a_i$ and $b_i$ are the fractions of the ends of edges that are attached to nodes of type $i$.
