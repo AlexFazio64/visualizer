@@ -1,10 +1,14 @@
 <script>
   import * as d3 from "d3";
   import { onMount } from "svelte";
+  import { assortativity } from "./graph";
 
   export let degrees = new Map();
   export let categories_map = new Map();
   export let dist_filter = undefined;
+
+  let coefficient = 0;
+  let links = [];
 
   let _x = -1;
   let _y = -1;
@@ -145,8 +149,17 @@
       .text((d) => degreeCounts[d]);
   }
 
-  onMount(() => {
+  onMount(async () => {
     plot(degrees);
+
+    links = await fetch("/links.json")
+      .then((res) => res.json())
+      .then((data) => {
+        return data;
+      });
+
+    coefficient = assortativity(links, degrees);
+    coefficient = Math.round(coefficient * 1000) / 1000;
   });
 </script>
 
@@ -157,6 +170,7 @@
         ? ": " + dist_filter
         : ": all categories"}
     </p>
+    <p>Assortativity: {coefficient}</p>
     <p>{_x >= 0 ? "Degree: " + _x : ""}</p>
     <p>{_y >= 0 ? "#Nodes: " + _y : ""}</p>
   </span>
@@ -168,7 +182,7 @@
     width: 100%;
     max-width: 100%;
     display: grid;
-    grid-template-columns: repeat(2, auto 3fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 0.5em;
     justify-items: center;
     align-content: center;

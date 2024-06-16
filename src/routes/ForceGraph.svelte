@@ -1,8 +1,8 @@
 <script>
   import { onMount } from "svelte";
   import * as d3 from "d3";
-  import * as graph from "./graph";
   import { createEventDispatcher } from "svelte";
+  import { getEdges, assortativity } from "./graph";
 
   const dispatch = createEventDispatcher();
   export let toggle = false;
@@ -35,7 +35,7 @@
 
   $: if (selected_arr) {
     if (selected_arr.length === 2)
-      edges = graph.getEdges(
+      edges = getEdges(
         selected_arr[0].__data__.id,
         selected_arr[1].__data__.id,
         nodes,
@@ -73,25 +73,68 @@
     c.attributes.getNamedItem("stroke").value = highlight ? "#1e1e1e" : "#fff";
   }
 
-  const nodes = [];
-  const links = [];
+  let nodes = [];
+  let links = [];
   let degrees = new Map();
-  const url_id = new Map();
+  let url_id = new Map();
 
   onMount(async () => {
-    const files = await fetch("/api/files")
+    nodes = await fetch("/nodes.json")
       .then((res) => res.json())
       .then((data) => {
         return data;
       });
 
-    await graph.make_nodes(nodes, url_id, files);
-    graph.make_links(nodes, url_id, links);
-    degrees = graph.getDegrees(nodes, links);
-    dispatch("degrees", { degrees });
+    links = await fetch("/links.json")
+      .then((res) => res.json())
+      .then((data) => {
+        return data;
+      });
 
-    categories = await graph.getCategories(nodes);
+    degrees = await fetch("/degrees.json")
+      .then((res) => res.json())
+      .then((data) => {
+        return new Map(data);
+      });
+
+    url_id = await fetch("/urls.json")
+      .then((res) => res.json())
+      .then((data) => {
+        return new Map(data);
+      });
+
+    categories = await fetch("/categories.json")
+      .then((res) => res.json())
+      .then((data) => {
+        return new Map(data);
+      });
+
+    // const files = await fetch("/api/files")
+    //   .then((res) => res.json())
+    //   .then((data) => {
+    //     return data;
+    //   });
+
+    // await graph.make_nodes(nodes, url_id, files);
+    // graph.make_links(nodes, url_id, links);
+    // degrees = graph.getDegrees(nodes, links);
+    // categories = await graph.getCategories(nodes);
+
+    dispatch("degrees", { degrees });
     dispatch("categories", { categories });
+
+    // let deg_arr = Array.from(degrees);
+    // let url_arr = Array.from(url_id);
+    // let cat_arr = Array.from(categories);
+
+    // fetch("/api/assortativity", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({ nodes, links, deg_arr, cat_arr, url_arr }),
+    // });
+
     function zoomed({ transform }) {
       g.attr("transform", transform);
     }

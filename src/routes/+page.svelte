@@ -1,10 +1,10 @@
 <script>
-  import ForceGraph from "./ForceGraph.svelte";
+  import { onMount } from "svelte";
   import NavBar from "./NavBar.svelte";
   import Search from "./Search.svelte";
   import SideBar from "./SideBar.svelte";
+  import ForceGraph from "./ForceGraph.svelte";
   import Distribution from "./Distribution.svelte";
-  import { onMount } from "svelte";
 
   let show_search = false;
   let show_distribution = false;

@@ -1,15 +1,22 @@
 <script>
+  import { onMount } from "svelte";
+
+  const nodes = new Map();
+  onMount(async () => {
+    await fetch("/nodes.json")
+      .then((res) => res.json())
+      .then((data) => {
+        for (let n of data) nodes.set(n.id, n.Description);
+      });
+  });
+
   export let selected_arr = [];
   export let edges = [];
   export let categories_map = new Map();
   export let degrees = new Map();
 
-  async function description(item) {
-    const resp = await fetch(
-      `/api/description?dir=${item.includes("&") ? item.replace("&", "%26") : item}`
-    );
-
-    return await resp.json();
+  function description(item) {
+    return nodes.get(item);
   }
 </script>
 
@@ -60,11 +67,7 @@
       {/if}
 
       {#if selected_arr.length === 1}
-        {#await description(item)}
-          <p class="node">Loading...</p>
-        {:then data}
-          <p class="node">{data}</p>
-        {/await}
+        <p class="node">{description(item)}</p>
       {/if}
     {/each}
   {/if}

@@ -8,5 +8,7 @@ plotting of degree distribution [done]
 move wiki data to local directory [done]
 update api to serve local data [done]
 
+find assortativity coefficient [done]
+
 find shortest path between two nodes [optional]
 bubble chart based on degree on node [optional]

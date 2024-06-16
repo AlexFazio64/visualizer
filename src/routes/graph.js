@@ -1,89 +1,3 @@
-export function make_links(wiki_nodes, url_to_dir, wiki_links) {
-  let wiki_links_map = new Map();
-  let duplicates = 0;
-
-  for (let node of wiki_nodes)
-    for (let key in node) {
-      if (
-        !node.hasOwnProperty(key) ||
-        typeof node[key] !== "object" ||
-        !node[key].link
-      )
-        continue;
-
-      const links = node[key].link;
-      for (let link of links)
-        if (node.id && url_to_dir.get(link)) {
-          const link_id = `${node.id}-${url_to_dir.get(link)}`;
-          if (!wiki_links_map.has(link_id)) {
-            wiki_links_map.set(link_id, true);
-            wiki_links.push({
-              source: node.id,
-              target: url_to_dir.get(link),
-            });
-          } else {
-            duplicates++;
-          }
-        }
-    }
-}
-
-export function make_nodes(wiki_nodes, url_to_dir, files) {
-  const promises = [];
-  for (const file of files) {
-    const promise = fetch(
-      `/api/node?dir=${file.includes("&") ? file.replace("&", "%26") : file}`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        wiki_nodes.push(data);
-        url_to_dir.set(data.url, data.id);
-      });
-    promises.push(promise);
-  }
-  return Promise.all(promises);
-}
-
-export async function getCategories() {
-  let categories = await fetch("/api/categories").then((response) =>
-    response.json()
-  );
-
-  categories = new Map(
-    categories.map((category) => [category.id, category.categories])
-  );
-  return categories;
-}
-
-export function getDegrees(nodes, links) {
-  const degrees = new Map();
-
-  for (let node of nodes) {
-    degrees.set(node.id, 0);
-    for (let link of links) {
-      if (link.source === node.id || link.target === node.id) {
-        if (degrees.has(node.id)) {
-          degrees.set(node.id, degrees.get(node.id) + 1);
-        }
-      }
-    }
-  }
-
-  return degrees;
-}
-
-export function degrees(map) {
-  let max = 0;
-  let min = 0;
-
-  for (let value of map.values()) {
-    if (value > max) max = value;
-    if (value < min) min = value;
-  }
-
-  return { max, min };
-}
-
 export function getEdges(id1, id2, nodes, url_id) {
   let node1 = null;
   let node2 = null;
@@ -123,4 +37,29 @@ export function getEdges(id1, id2, nodes, url_id) {
   info = info.filter((text) => text.length > 0);
 
   return info;
+}
+
+export function assortativity(e, d) {
+  let A = 0;
+  for (let { source, target } of e) A += d.get(source) * d.get(target);
+
+  A /= e.length;
+  const variance = 0.5 * A ** 2;
+
+  let B = 0;
+  for (let { source, target } of e)
+    B += Math.pow(d.get(source), 2) * Math.pow(d.get(target), 2);
+  B /= e.length * 2;
+
+  return (A - variance) / (B - variance);
+}
+
+export function save(name, data) {
+  fetch("/api/store", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ data: JSON.stringify(data), name }),
+  });
 }
