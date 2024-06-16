@@ -153,7 +153,7 @@
     plot(degrees);
 
     links = await fetch(
-      process.env.NODE_ENV !== "development"
+      process.env.NODE_ENV === "development"
         ? "/links.json"
         : "/visualizer/links.json"
     )
@@ -165,6 +165,8 @@
     coefficient = assortativity(links, degrees);
     coefficient = Math.round(coefficient * 1000) / 1000;
   });
+
+
 </script>
 
 <section id="distribution">

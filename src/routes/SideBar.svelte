@@ -4,7 +4,7 @@
   const nodes = new Map();
   onMount(async () => {
     await fetch(
-      process.env.NODE_ENV !== "development"
+      process.env.NODE_ENV === "development"
         ? "/nodes.json"
         : "/visualizer/nodes.json"
     )

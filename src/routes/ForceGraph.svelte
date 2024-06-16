@@ -80,7 +80,7 @@
 
   onMount(async () => {
     nodes = await fetch(
-      process.env.NODE_ENV !== "development"
+      process.env.NODE_ENV === "development"
         ? "/nodes.json"
         : "/visualizer/nodes.json"
     )
@@ -90,7 +90,7 @@
       });
 
     links = await fetch(
-      process.env.NODE_ENV !== "development"
+      process.env.NODE_ENV === "development"
         ? "/links.json"
         : "/visualizer/links.json"
     )
@@ -100,7 +100,7 @@
       });
 
     degrees = await fetch(
-      process.env.NODE_ENV !== "development"
+      process.env.NODE_ENV === "development"
         ? "/degrees.json"
         : "/visualizer/degrees.json"
     )
@@ -110,7 +110,7 @@
       });
 
     url_id = await fetch(
-      process.env.NODE_ENV !== "development"
+      process.env.NODE_ENV === "development"
         ? "/urls.json"
         : "/visualizer/urls.json"
     )
@@ -120,7 +120,7 @@
       });
 
     categories = await fetch(
-      process.env.NODE_ENV !== "development"
+      process.env.NODE_ENV === "development"
         ? "/categories.json"
         : "/visualizer/categories.json"
     )
