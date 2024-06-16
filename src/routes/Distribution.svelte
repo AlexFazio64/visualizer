@@ -152,7 +152,7 @@
   onMount(async () => {
     plot(degrees);
 
-    links = await fetch("/links.json")
+    links = await fetch("/visualizer/links.json")
       .then((res) => res.json())
       .then((data) => {
         return data;

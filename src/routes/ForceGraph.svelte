@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import * as d3 from "d3";
   import { createEventDispatcher } from "svelte";
-  import { getEdges, assortativity } from "./graph";
+  import { getEdges } from "./graph";
 
   const dispatch = createEventDispatcher();
   export let toggle = false;
@@ -79,61 +79,38 @@
   let url_id = new Map();
 
   onMount(async () => {
-    nodes = await fetch("/nodes.json")
+    nodes = await fetch("/visualizer/nodes.json")
       .then((res) => res.json())
       .then((data) => {
         return data;
       });
 
-    links = await fetch("/links.json")
+    links = await fetch("/visualizer/links.json")
       .then((res) => res.json())
       .then((data) => {
         return data;
       });
 
-    degrees = await fetch("/degrees.json")
+    degrees = await fetch("/visualizer/degrees.json")
       .then((res) => res.json())
       .then((data) => {
         return new Map(data);
       });
 
-    url_id = await fetch("/urls.json")
+    url_id = await fetch("/visualizer/urls.json")
       .then((res) => res.json())
       .then((data) => {
         return new Map(data);
       });
 
-    categories = await fetch("/categories.json")
+    categories = await fetch("/visualizer/categories.json")
       .then((res) => res.json())
       .then((data) => {
         return new Map(data);
       });
-
-    // const files = await fetch("/api/files")
-    //   .then((res) => res.json())
-    //   .then((data) => {
-    //     return data;
-    //   });
-
-    // await graph.make_nodes(nodes, url_id, files);
-    // graph.make_links(nodes, url_id, links);
-    // degrees = graph.getDegrees(nodes, links);
-    // categories = await graph.getCategories(nodes);
 
     dispatch("degrees", { degrees });
     dispatch("categories", { categories });
-
-    // let deg_arr = Array.from(degrees);
-    // let url_arr = Array.from(url_id);
-    // let cat_arr = Array.from(categories);
-
-    // fetch("/api/assortativity", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({ nodes, links, deg_arr, cat_arr, url_arr }),
-    // });
 
     function zoomed({ transform }) {
       g.attr("transform", transform);

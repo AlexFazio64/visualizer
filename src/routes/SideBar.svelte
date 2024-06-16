@@ -3,7 +3,7 @@
 
   const nodes = new Map();
   onMount(async () => {
-    await fetch("/nodes.json")
+    await fetch("/visualizer/nodes.json")
       .then((res) => res.json())
       .then((data) => {
         for (let n of data) nodes.set(n.id, n.Description);
