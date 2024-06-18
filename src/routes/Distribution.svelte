@@ -1,7 +1,7 @@
 <script>
   import * as d3 from "d3";
   import { onMount } from "svelte";
-  import { assortativity, discrete_assortativity } from "./graph";
+  import { assortativity, assortativity_mixing } from "./graph";
 
   export let degrees = new Map();
   export let categories_map = new Map();
@@ -153,31 +153,6 @@
 
   onMount(async () => {
     plot(degrees);
-
-    links = await fetch(
-      process.env.NODE_ENV === "development"
-        ? "/links.json"
-        : "/visualizer/links.json"
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        return data;
-      });
-
-    nodes = await fetch(
-      process.env.NODE_ENV === "development"
-        ? "/nodes.json"
-        : "/visualizer/nodes.json"
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        return data;
-      });
-
-    coefficient = assortativity(links, degrees);
-    coefficient = Math.round(coefficient * 1000) / 1000;
-
-    discrete_assortativity(links, categories_set, categories_map);
   });
 </script>
 
@@ -188,7 +163,6 @@
         ? ": " + dist_filter
         : ": all categories"}
     </p>
-    <p>Assortativity: {coefficient}</p>
     <p>{_x >= 0 ? "Degree: " + _x : ""}</p>
     <p>{_y >= 0 ? "#Nodes: " + _y : ""}</p>
   </span>
@@ -200,7 +174,7 @@
     width: 100%;
     max-width: 100%;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.5em;
     justify-items: center;
     align-content: center;

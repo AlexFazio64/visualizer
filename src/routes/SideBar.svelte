@@ -30,6 +30,9 @@
       <code>CTRL+ALT+D</code>
       <p class="hint">(show / hide) degree distribution</p>
 
+      <code>CTRL+ALT+A</code>
+      <p class="hint">(show / hide) assortativity analisys</p>
+
       <code>ALT+P</code>
       <p class="hint">(show / hide) search bar</p>
 

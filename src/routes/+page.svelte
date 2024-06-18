@@ -5,9 +5,11 @@
   import SideBar from "./SideBar.svelte";
   import ForceGraph from "./ForceGraph.svelte";
   import Distribution from "./Distribution.svelte";
+  import Assortativity from "./Assortativity.svelte";
 
   let show_search = false;
   let show_distribution = false;
+  let show_assortativity = false;
 
   let toggle = false;
   let edges = [];
@@ -79,8 +81,17 @@
     });
 
     document.addEventListener("keydown", (e) => {
-      if (e.key === "d" && e.altKey && e.ctrlKey)
+      if (e.key === "d" && e.altKey && e.ctrlKey) {
         show_distribution = !show_distribution;
+        show_search = show_assortativity = false;
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "a" && e.altKey && e.ctrlKey) {
+        show_assortativity = !show_assortativity;
+        show_search = show_distribution = false;
+      }
     });
   });
 </script>
@@ -100,6 +111,8 @@
 
   {#if show_distribution}
     <Distribution {degrees} {categories_map} {dist_filter} {categories_set} />
+  {:else if show_assortativity}
+    <Assortativity {degrees} {categories_map} {categories_set} />
   {:else}
     <ForceGraph
       on:cleared={handle_cleared}

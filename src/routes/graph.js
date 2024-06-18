@@ -45,7 +45,7 @@ export function assortativity(e, d) {
 
   A /= e.length;
   const variance = 0.5 * A ** 2;
-
+  
   let B = 0;
   for (let { source, target } of e)
     B += Math.pow(d.get(source), 2) * Math.pow(d.get(target), 2);
@@ -54,7 +54,7 @@ export function assortativity(e, d) {
   return (A - variance) / (B - variance);
 }
 
-export function assortativity_matrix(edges, categories, map) {
+export function assortativity_mixing(edges, categories, map) {
   const is_edge_from_to = ({ source, target }, cat1, cat2) => {
     return (
       map.get(source).filter(({ text }) => text === cat1).length > 0 &&
@@ -71,6 +71,8 @@ export function assortativity_matrix(edges, categories, map) {
   };
 
   let matrix = new Map();
+  let E = 0;
+  let A = 0;
 
   for (let cat of categories) {
     matrix.set(cat, []);
@@ -80,26 +82,28 @@ export function assortativity_matrix(edges, categories, map) {
       for (let l2 of edges) if (is_edge_from_to(l2, cat, cat2)) a_i++;
 
       a_i /= total_edges();
+      if (cat === cat2) E += a_i;
+
       matrix.get(cat).push({ category: cat2, value: a_i });
     }
   }
 
   let tot = 0;
-  let i = 0;
+  let a_i = [];
   for (let cat1 of categories) {
     let a = [];
-    for (let row of matrix.get(cat1)) a.push(row.value);
-    for (let { value } of matrix.get(cat1)) tot += value;
+    for (let { value } of matrix.get(cat1)) {
+      a.push(value);
+      tot += value;
+    }
 
-    console.log(
-      "a_" + ++i,
-      a.reduce((acc, val) => acc + val, 0)
-    );
+    let row_sum = a.reduce((acc, val) => acc + val, 0);
+    a_i.push(row_sum);
+    A += row_sum ** 2; // undirected so A_i = B_i
   }
 
-  console.log(tot);
-
-  // compute assortativity mixing
+  let R = E - A / (1 - A);
+  return { matrix, a_i, R, tot };
 }
 
 export function save(name, data) {
