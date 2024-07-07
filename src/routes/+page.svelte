@@ -110,7 +110,7 @@
   />
 
   {#if show_distribution}
-    <Distribution {degrees} {categories_map} {dist_filter} {categories_set} />
+    <Distribution {degrees} {categories_map} {dist_filter} />
   {:else if show_assortativity}
     <Assortativity {degrees} {categories_map} {categories_set} />
   {:else}

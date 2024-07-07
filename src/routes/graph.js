@@ -45,7 +45,7 @@ export function assortativity(e, d) {
 
   A /= e.length;
   const variance = 0.5 * A ** 2;
-  
+
   let B = 0;
   for (let { source, target } of e)
     B += Math.pow(d.get(source), 2) * Math.pow(d.get(target), 2);
@@ -114,4 +114,82 @@ export function save(name, data) {
     },
     body: JSON.stringify({ data: JSON.stringify(data), name }),
   });
+}
+
+export async function shortest_path(edges, s, t) {
+  let visited = new Set();
+  let queue = [];
+  let parent = new Map();
+  let found = false;
+
+  queue.push(s);
+  visited.add(s);
+
+  while (queue.length > 0) {
+    let current = queue.shift();
+
+    if (current === t) {
+      found = true;
+      break;
+    }
+
+    for (let { source, target } of edges) {
+      if (source === current && !visited.has(target)) {
+        visited.add(target);
+        parent.set(target, source);
+        queue.push(target);
+      } else if (target === current && !visited.has(source)) {
+        visited.add(source);
+        parent.set(source, target);
+        queue.push(source);
+      }
+    }
+  }
+
+  if (!found) return [];
+
+  let path = [];
+  let current = t;
+  while (current !== s) {
+    path.push(current);
+    current = parent.get(current);
+  }
+  path.push(s);
+
+  return path.reverse();
+}
+
+export async function memoize_distances(nodes, edges) {
+  let distance_matrix = Array(nodes.length);
+  for (let i = 0; i < nodes.length; i++) {
+    distance_matrix[i] = Array(nodes.length);
+  }
+
+  let computed = new Set();
+
+  for (let i = 0; i < nodes.length; i++) {
+    let source = nodes[i];
+
+    for (let j = 0; j < nodes.length; j++) {
+      let target = nodes[j];
+
+      if (source.id === target.id) {
+        distance_matrix[i][j] = [source.id];
+      } else {
+        console.log(source.id, "->", target.id);
+
+        if (!computed.has({ i, j })) {
+          let p = await shortest_path(edges, source.id, target.id);
+
+          distance_matrix[i][j] = p;
+          distance_matrix[j][i] = [...p].reverse();
+
+          computed.add({ i, j });
+          computed.add({ j, i });
+        }
+      }
+    }
+  }
+
+  return distance_matrix;
 }

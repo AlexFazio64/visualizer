@@ -1,16 +1,10 @@
 <script>
   import * as d3 from "d3";
   import { onMount } from "svelte";
-  import { assortativity, assortativity_mixing } from "./graph";
 
   export let degrees = new Map();
   export let categories_map = new Map();
-  export let categories_set = new Set();
   export let dist_filter = undefined;
-
-  let coefficient = 0;
-  let links = [];
-  let nodes = [];
 
   let _x = -1;
   let _y = -1;
