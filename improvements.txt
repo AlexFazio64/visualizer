@@ -7,8 +7,15 @@ filter by degree threshold [done]
 plotting of degree distribution [done]
 move wiki data to local directory [done]
 update api to serve local data [done]
-
 find assortativity coefficient [done]
+find shortest path between two nodes [done]
+	show path on graph [todo?]
 
-find shortest path between two nodes [optional]
-bubble chart based on degree on node [optional]
+components [todo?]
+clustering coefficient [todo?]
+page rank [todo?] (undirected graph .-.)
+
+closeness centrality [ongoing]
+betweenness centrality [ongoing]
+graph density [ongoing]
+Hubs and Authorities [todo] (divide by category?)

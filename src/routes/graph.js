@@ -193,3 +193,30 @@ export async function memoize_distances(nodes, edges) {
 
   return distance_matrix;
 }
+
+export function graph_stats(distance_matrix) {
+  // add more measures
+  
+  let avg = 0;
+  let valid = 0;
+  let invalid = 0;
+  let diameter = 0;
+
+  for (let i = 0; i < distance_matrix.length; i++) {
+    let isolated = true;
+    for (let j = 0; j < distance_matrix.length; j++) {
+      if (distance_matrix[i][j].length > 1) {
+        avg += distance_matrix[i][j].length;
+        valid++;
+        isolated = false;
+      }
+      if (distance_matrix[i][j].length > diameter)
+        diameter = distance_matrix[i][j].length;
+    }
+    if (isolated) invalid++;
+  }
+
+  avg /= valid;
+  avg = Math.round(avg * 100) / 100;
+  return { diameter, avg, invalid };
+}

@@ -3,8 +3,9 @@
   import {
     assortativity,
     assortativity_mixing,
-    memoize_distances,
-    save,
+    graph_stats,
+    // memoize_distances,
+    // save,
   } from "./graph";
 
   let edges = [];
@@ -17,6 +18,7 @@
   let R = 0;
   let distances = null;
   let s, t;
+  let stats = {};
 
   onMount(async () => {
     s = undefined;
@@ -62,6 +64,8 @@
       .then((data) => {
         return data;
       });
+
+    stats = graph_stats(distances);
   });
 
   function set_node(e, source = true) {
@@ -69,61 +73,76 @@
     else t = e.target.value;
   }
 
-  $: if (s != undefined && t != undefined) {
-    console.log(s, t);
-    if (distances != null) {
-      console.log(distances[s][t]);
-    }
-  }
+  // $: if (s != undefined && t != undefined) {
+  //   console.log(s, t);
+  //   if (distances != null) {
+  //     console.log(distances[s][t]);
+  //   }
+  // }
 </script>
 
 <div>
-  <h1>Assortativity Coefficient</h1>
-  <p>{coefficient}</p>
-  <h1>Discrete Assortativity Mixing</h1>
-  <p>{R}</p>
-  <h1>Path</h1>
-  <span class="path-node">
+  <section>
+    <h1>Assortativity Coefficient</h1>
+    <p>{coefficient}</p>
+    <h1>Discrete Assortativity Mixing</h1>
+    <p>{R}</p>
+    <h1>Graph Stats</h1>
+    <p>Graph Diameter: {stats.diameter}</p>
+    <p>Average Path length: {stats.avg}</p>
+    <p>Isolated nodes: {stats.invalid}</p>
+  </section>
+
+  <section>
+    <h1>Path</h1>
     <p>source</p>
     <select name="source" id="s" on:change={(e) => set_node(e)}>
       {#each nodes as node, i}
         <option value={i}>{node.id}</option>
       {/each}
     </select>
+
     <p>target</p>
     <select name="target" id="t" on:change={(e) => set_node(e, false)}>
       {#each nodes as node, i}
         <option value={i}>{node.id}</option>
       {/each}
     </select>
-  </span>
-  {#if s != undefined && t != undefined}
-    <span class="path">
-      {#if distances[s][t].length == 0}
-        <p>No path found</p>
-      {:else}
-        <p>length: {distances[s][t].length}</p>
-        {#each distances[s][t] as step}
-          <p>{step}</p>
-        {/each}
-      {/if}
-    </span>
-  {/if}
+    {#if s != undefined && t != undefined}
+      <p>length: {distances[s][t].length}</p>
+
+      <span class="path">
+        {#if distances[s][t].length == 0}
+          <p>No path found</p>
+        {:else}
+          {#each distances[s][t] as step}
+            <p>{step}</p>
+          {/each}
+        {/if}
+      </span>
+    {/if}
+  </section>
 </div>
 
 <style>
   div {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
     width: 100%;
     height: 100%;
-    justify-content: center;
-    align-items: center;
+
     font-family: sans-serif;
     color: white;
   }
 
+  section {
+    display: flex;
+    flex-direction: column;
+  }
+
   select {
+    width: 75%;
     margin: 10px;
     padding: 5px;
     border: none;
@@ -131,18 +150,11 @@
     background-color: transparent;
     color: white;
     text-align: center;
+    align-self: center;
   }
 
   option {
     background-color: #181a1b;
-  }
-
-  .path-node {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    justify-content: center;
-    align-items: center;
-    width: min-content;
   }
 
   span.path {
