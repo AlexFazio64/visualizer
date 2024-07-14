@@ -9,13 +9,12 @@ move wiki data to local directory [done]
 update api to serve local data [done]
 find assortativity coefficient [done]
 find shortest path between two nodes [done]
-	show path on graph [todo?]
+	show path on graph [not required]
+graph density [done]
+components [done]
+closeness centrality [done]
+local clustering coefficient [done]
 
-components [todo?]
-clustering coefficient [todo?]
-page rank [todo?] (undirected graph .-.)
-
-closeness centrality [ongoing]
-betweenness centrality [ongoing]
-graph density [ongoing]
-Hubs and Authorities [todo] (divide by category?)
+betweenness centrality [maybe later]
+page rank [maybe later] (undirected graph .-.)
+Hubs and Authorities [maybe later] (divide by category? should be used at runtime)

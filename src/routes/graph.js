@@ -195,28 +195,123 @@ export async function memoize_distances(nodes, edges) {
 }
 
 export function graph_stats(distance_matrix) {
-  // add more measures
-  
   let avg = 0;
   let valid = 0;
   let invalid = 0;
   let diameter = 0;
+  let closeness = [];
 
   for (let i = 0; i < distance_matrix.length; i++) {
     let isolated = true;
+    let node_closeness = 0;
+
     for (let j = 0; j < distance_matrix.length; j++) {
       if (distance_matrix[i][j].length > 1) {
-        avg += distance_matrix[i][j].length;
         valid++;
         isolated = false;
+        avg += distance_matrix[i][j].length;
+        node_closeness += distance_matrix[i][j].length;
       }
+
       if (distance_matrix[i][j].length > diameter)
         diameter = distance_matrix[i][j].length;
     }
+
+    node_closeness = (distance_matrix.length - 1) / node_closeness;
+    closeness.push({ i, node_closeness });
     if (isolated) invalid++;
   }
 
   avg /= valid;
   avg = Math.round(avg * 100) / 100;
-  return { diameter, avg, invalid };
+  return { diameter, avg, invalid, closeness };
+}
+
+export function graph_components(edges, nodes) {
+ let visited = new Set();
+  visited.add(nodes[0].id);
+
+  let components = [];
+  let comp = [];
+  let queue = [];
+
+  queue.push(nodes[0].id);
+
+  while (queue.length > 0) {
+    let current = queue.shift();
+    comp.push(current);
+
+    for (let { source, target } of edges) {
+      if (source === current && !visited.has(target)) {
+        visited.add(target);
+        queue.push(target);
+      } else if (target === current && !visited.has(source)) {
+        visited.add(source);
+        queue.push(source);
+      }
+    }
+
+    if (queue.length === 0) {
+      components.push(comp);
+      comp = [];
+      for (let node of nodes) {
+        if (!visited.has(node.id)) {
+          visited.add(node.id);
+          queue.push(node.id);
+          break;
+        }
+      }
+    }
+  }
+
+  return components;
+}
+
+export function clustering_coefficient(edges, nodes) {
+  let coefficients = new Map();
+
+  for (let node of nodes) {
+    let neighbors = new Set();
+
+    for (let { source, target } of edges) {
+      if (source === node.id) {
+        neighbors.add(target);
+      } else if (target === node.id) {
+        neighbors.add(source);
+      }
+    }
+
+    let edges_between_neighbors = new Set();
+    for (let neighbor of neighbors) {
+      for (let { source, target } of edges) {
+        if (
+          (source === neighbor && neighbors.has(target)) ||
+          (target === neighbor && neighbors.has(source))
+        ) {
+          let [min, max] = [
+            Math.min(source.id, target.id),
+            Math.max(source.id, target.id),
+          ];
+          let key = `${min}-${max}`;
+
+          if (!edges_between_neighbors.has(key)) {
+            edges_between_neighbors.add(key);
+          }
+        }
+      }
+    }
+
+    let max_num_edges = neighbors.size * (neighbors.size - 1);
+    let clustering = 0;
+
+    if (max_num_edges !== 0)
+      clustering = (2 * edges_between_neighbors.size) / max_num_edges;
+    coefficients.set(node.id, clustering);
+  }
+
+  return coefficients;
+}
+
+export function graph_density(edges, nodes) {
+  return (2 * edges) / (nodes * (nodes - 1));
 }
